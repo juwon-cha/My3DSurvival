@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Equipment : MonoBehaviour
 {
@@ -28,6 +29,14 @@ public class Equipment : MonoBehaviour
         {
             Destroy(CurEquip.gameObject);
             CurEquip = null;
+        }
+    }
+
+    public void OnAttackInput(InputAction.CallbackContext context)
+    {
+        if(context.phase == InputActionPhase.Performed && CurEquip != null && _controller.CanLook)
+        {
+            CurEquip.OnAttackInput();
         }
     }
 }

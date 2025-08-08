@@ -14,4 +14,42 @@ public class EquipTool : Equip
     [Header("Combat")]
     public bool DoesDealDamage;
     public int Damage;
+
+    private Animator _animator;
+    private Camera _camera;
+
+    private void Start()
+    {
+        _animator = GetComponent<Animator>();
+        _camera = Camera.main;
+    }
+
+    public override void OnAttackInput()
+    {
+        if(!isAttacking)
+        {
+            isAttacking = true;
+            _animator.SetTrigger("Attack");
+            Invoke("OnCanAttack", AttackRate);
+        }
+    }
+
+    private void OnCanAttack()
+    {
+        isAttacking = false;
+    }
+
+    public void OnHit()
+    {
+        Ray ray = _camera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        RaycastHit hit;
+
+        if(Physics.Raycast(ray, out hit, AttackDistance))
+        {
+            if(DoesGatherResources && hit.collider.TryGetComponent(out Resource resource))
+            {
+                resource.Gather(hit.point, hit.normal);
+            }
+        }
+    }
 }
