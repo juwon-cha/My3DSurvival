@@ -707,7 +707,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 186762570}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1918685969}
+        m_TargetAssemblyTypeName: UIInventory, Assembly-CSharp
+        m_MethodName: OnUnEquipButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &186762570
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2574,7 +2586,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 646666699}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1918685969}
+        m_TargetAssemblyTypeName: UIInventory, Assembly-CSharp
+        m_MethodName: OnEquipButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &646666699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3887,6 +3911,7 @@ GameObject:
   - component: {fileID: 1204564964}
   - component: {fileID: 1204564966}
   - component: {fileID: 1204564967}
+  - component: {fileID: 1204564968}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -4111,6 +4136,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerController: {fileID: 0}
   PlayerCondition: {fileID: 0}
+  Equip: {fileID: 0}
   ItemData: {fileID: 0}
   DropPosition: {fileID: 25203474}
 --- !u!114 &1204564966
@@ -4146,6 +4172,20 @@ MonoBehaviour:
     m_Bits: 128
   CurInteractGameObject: {fileID: 0}
   PromptText: {fileID: 1968459053}
+--- !u!114 &1204564968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1204564959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 061ed93cb36c3ea4daf97f42bcbafccb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CurEquip: {fileID: 0}
+  EquipParent: {fileID: 994120344}
 --- !u!1 &1214493053
 GameObject:
   m_ObjectHideFlags: 0

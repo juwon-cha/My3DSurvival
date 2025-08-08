@@ -22,19 +22,21 @@ public class UIInventory : MonoBehaviour
     public GameObject UnEquipButton;
     public GameObject DropButton;
 
-    private PlayerController controller;
-    private PlayerCondition condition;
+    private PlayerController _controller;
+    private PlayerCondition _condition;
 
     private ItemData _selectedItem;
     private int _selectedItemIndex = 0;
 
+    private int CurEquipIndex;
+
     private void Start()
     {
-        controller = CharacterManager.Instance.Player.PlayerController;
-        condition = CharacterManager.Instance.Player.PlayerCondition;
+        _controller = CharacterManager.Instance.Player.PlayerController;
+        _condition = CharacterManager.Instance.Player.PlayerCondition;
         DropPosition = CharacterManager.Instance.Player.DropPosition;
 
-        controller.Inventory += Toggle;
+        _controller.Inventory += Toggle;
         CharacterManager.Instance.Player.AddItem += AddItem;
 
         InventoryWindow.SetActive(false);
@@ -203,11 +205,11 @@ public class UIInventory : MonoBehaviour
                 switch(_selectedItem.Consumables[i].Type)
                 {
                     case EConsumableType.Health:
-                        condition.Heal(_selectedItem.Consumables[i].Value);
+                        _condition.Heal(_selectedItem.Consumables[i].Value);
                         break;
 
                     case EConsumableType.Hunger:
-                        condition.Eat(_selectedItem.Consumables[i].Value);
+                        _condition.Eat(_selectedItem.Consumables[i].Value);
                         break;
 
                     default:
@@ -239,5 +241,37 @@ public class UIInventory : MonoBehaviour
         }
 
         UpdateUI();
+    }
+
+    public void OnEquipButton()
+    {
+        if (Slots[CurEquipIndex].Equipped)
+        {
+            UnEquip(CurEquipIndex);
+        }
+
+        Slots[_selectedItemIndex].Equipped = true;
+        CurEquipIndex = _selectedItemIndex;
+        CharacterManager.Instance.Player.Equip.EquipNew(_selectedItem);
+        UpdateUI();
+
+        SelectItem(_selectedItemIndex);
+    }
+
+    public void OnUnEquipButton()
+    {
+        UnEquip(_selectedItemIndex);
+    }
+
+    private void UnEquip(int index)
+    {
+        Slots[index].Equipped = false;
+        CharacterManager.Instance.Player.Equip.UnEquip();
+        UpdateUI();
+
+        if(_selectedItemIndex == index)
+        {
+            SelectItem(_selectedItemIndex);
+        }
     }
 }
