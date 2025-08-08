@@ -7,6 +7,7 @@ public class EquipTool : Equip
     public float AttackRate;
     private bool isAttacking;
     public float AttackDistance;
+    public float UseStamina;
 
     [Header("Resource Gathering")]
     public bool DoesGatherResources;
@@ -28,9 +29,12 @@ public class EquipTool : Equip
     {
         if(!isAttacking)
         {
-            isAttacking = true;
-            _animator.SetTrigger("Attack");
-            Invoke("OnCanAttack", AttackRate);
+            if(CharacterManager.Instance.Player.PlayerCondition.UseStamina(UseStamina))
+            {
+                isAttacking = true;
+                _animator.SetTrigger("Attack");
+                Invoke("OnCanAttack", AttackRate);
+            }
         }
     }
 
