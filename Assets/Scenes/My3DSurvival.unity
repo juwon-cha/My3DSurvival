@@ -1207,10 +1207,10 @@ MonoBehaviour:
   MaxWanderDistance: 10
   MinWanderWaitTime: 1
   MaxWanderWaitTime: 5
-  Damage: 0
-  AttackRate: 0
-  AttackDistance: 0
-  FieldOfView: 0
+  Damage: 5
+  AttackRate: 1.5
+  AttackDistance: 2
+  FieldOfView: 120
 --- !u!95 &336608653
 Animator:
   serializedVersion: 5

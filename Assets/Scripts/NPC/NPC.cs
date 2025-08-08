@@ -59,7 +59,7 @@ public class NPC : MonoBehaviour
 
         _animator.SetBool("Moving", _aiState != EAIState.Idle);
 
-        switch(_aiState)
+        switch (_aiState)
         {
             case EAIState.Idle:
             case EAIState.Wandering:
@@ -79,13 +79,13 @@ public class NPC : MonoBehaviour
     {
         _aiState = state;
 
-        switch(_aiState)
+        switch (_aiState)
         {
             case EAIState.Idle:
                 _agent.speed = WalkSpeed;
                 _agent.isStopped = true;
                 break;
-            
+
             case EAIState.Wandering:
                 _agent.speed = WalkSpeed;
                 _agent.isStopped = false;
@@ -105,17 +105,22 @@ public class NPC : MonoBehaviour
 
     private void PassiveUpdate()
     {
-        if(_aiState == EAIState.Wandering && _agent.remainingDistance < 0.1f)
+        if (_aiState == EAIState.Wandering && _agent.remainingDistance < 0.1f)
         {
             SetState(EAIState.Idle);
             Invoke("WanderToNewLocation", Random.Range(MinWanderWaitTime, MaxWanderWaitTime));
+        }
+
+        if (_playerDistance < DetectDistance)
+        {
+            SetState(EAIState.Attacking);
         }
     }
 
     private void WanderToNewLocation()
     {
         // 새로운 목표 지점 정해서 이동
-        if(_aiState != EAIState.Idle)
+        if (_aiState != EAIState.Idle)
         {
             return;
         }
@@ -132,12 +137,12 @@ public class NPC : MonoBehaviour
 
         int count = 0;
 
-        while(Vector3.Distance(transform.position, hit.position) < DetectDistance)
+        while (Vector3.Distance(transform.position, hit.position) < DetectDistance)
         {
             NavMesh.SamplePosition(transform.position + (Random.onUnitSphere * Random.Range(MinWanderDistance, MaxWanderDistance)), out hit, MaxWanderDistance, NavMesh.AllAreas);
             ++count;
 
-            if(count == 30)
+            if (count == 30)
             {
                 break;
             }
@@ -148,6 +153,50 @@ public class NPC : MonoBehaviour
 
     private void AttackingUpdate()
     {
+        if (_playerDistance < AttackDistance && IsPlayerInFieldOfView())
+        {
+            _agent.isStopped = true;
+            if(Time.time - _lastAttackTime > AttackRate)
+            {
+                _lastAttackTime = Time.time;
+                CharacterManager.Instance.Player.PlayerController.GetComponent<IDamagable>().TakePhysicalDamage(Damage);
+                _animator.speed = 1;
+                _animator.SetTrigger("Attack");
+            }
+        }
+        else
+        {
+            // 공격 범위에서 멀어졌지만 탐지 범위 안에 있을 때
+            if(_playerDistance < DetectDistance)
+            {
+                // 플레이어 쫓아감
+                _agent.isStopped = false;
+                NavMeshPath path = new NavMeshPath();
+                if(_agent.CalculatePath(CharacterManager.Instance.Player.transform.position, path))
+                {
+                    _agent.SetDestination(CharacterManager.Instance.Player.transform.position);
+                }
+                else
+                {
+                    _agent.SetDestination(transform.position);
+                    _agent.isStopped = true;
+                    SetState(EAIState.Wandering);
+                }
+            }
+            else // 공격하다가 플레이어가 멀어졌을 때
+            {
+                _agent.SetDestination(transform.position);
+                _agent.isStopped = true;
+                SetState(EAIState.Wandering);
+            }
+        }
+    }
 
+    private bool IsPlayerInFieldOfView()
+    {
+        Vector3 directionToPlayer = CharacterManager.Instance.Player.transform.position - transform.position;
+        float angle = Vector3.Angle(transform.forward, directionToPlayer);
+
+        return angle < FieldOfView * 0.5f;
     }
 }
