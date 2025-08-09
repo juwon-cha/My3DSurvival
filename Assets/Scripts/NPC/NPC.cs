@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,7 +9,7 @@ public enum EAIState
     Attacking
 }
 
-public class NPC : MonoBehaviour
+public class NPC : MonoBehaviour, IDamagable
 {
     [Header("Stat")]
     public int Health;
@@ -156,7 +157,7 @@ public class NPC : MonoBehaviour
         if (_playerDistance < AttackDistance && IsPlayerInFieldOfView())
         {
             _agent.isStopped = true;
-            if(Time.time - _lastAttackTime > AttackRate)
+            if (Time.time - _lastAttackTime > AttackRate)
             {
                 _lastAttackTime = Time.time;
                 CharacterManager.Instance.Player.PlayerController.GetComponent<IDamagable>().TakePhysicalDamage(Damage);
@@ -167,12 +168,12 @@ public class NPC : MonoBehaviour
         else
         {
             // 공격 범위에서 멀어졌지만 탐지 범위 안에 있을 때
-            if(_playerDistance < DetectDistance)
+            if (_playerDistance < DetectDistance)
             {
                 // 플레이어 쫓아감
                 _agent.isStopped = false;
                 NavMeshPath path = new NavMeshPath();
-                if(_agent.CalculatePath(CharacterManager.Instance.Player.transform.position, path))
+                if (_agent.CalculatePath(CharacterManager.Instance.Player.transform.position, path))
                 {
                     _agent.SetDestination(CharacterManager.Instance.Player.transform.position);
                 }
@@ -198,5 +199,44 @@ public class NPC : MonoBehaviour
         float angle = Vector3.Angle(transform.forward, directionToPlayer);
 
         return angle < FieldOfView * 0.5f;
+    }
+
+    public void TakePhysicalDamage(int damage)
+    {
+        Health -= damage;
+
+        if (Health <= 0)
+        {
+            Die();
+        }
+
+        // 데미지 효과
+        StartCoroutine(DamageFlash());
+    }
+
+    public void Die()
+    {
+        // 죽은 후 아이템 드랍
+        for(int i = 0; i < DropOnDeath.Length; i++)
+        {
+            Instantiate(DropOnDeath[i].DropPrefab, transform.position + Vector3.up * 2, Quaternion.identity);
+        }
+
+        Destroy(gameObject);
+    }
+
+    private IEnumerator DamageFlash()
+    {
+        for(int i = 0; i < _meshRenderers.Length; i++)
+        {
+            _meshRenderers[i].material.color = new Color(1.0f, 0.6f, 0.6f);
+        }
+
+        yield return new WaitForSeconds(0.1f);
+
+        for(int i = 0; i < _meshRenderers.Length; i++)
+        {
+            _meshRenderers[i].material.color = Color.white;
+        }
     }
 }
