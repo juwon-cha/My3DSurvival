@@ -41,7 +41,6 @@ public class PlayerController : MonoBehaviour
     public Action Inventory;
     private Rigidbody _rigidbody;
     private Animator _animator;
-    private Camera _mainCamera;
 
     // Player state
     private bool _isSprinting = false; // 스프린트 상태
@@ -70,7 +69,6 @@ public class PlayerController : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
-        _mainCamera = Camera.main;
 
         AssignAnimationIDs();
     }
