@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FootSteps : MonoBehaviour
@@ -20,6 +18,12 @@ public class FootSteps : MonoBehaviour
 
     private void Update()
     {
+        // 장판 위라면 플레리어의 부모가 장판이 됨 -> 장판 위에서 소리가 안 나게 수정
+        if(transform.parent != null)
+        {
+            return;
+        }
+
         if(Mathf.Abs(_rigidbody.velocity.y) < 0.1f) // 땅에 붙어 있을 때
         {
             // 발자국 소리 재생
