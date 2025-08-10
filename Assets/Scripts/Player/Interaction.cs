@@ -32,6 +32,8 @@ public class Interaction : MonoBehaviour
             Ray ray = _camera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
             RaycastHit hit;
 
+            Debug.DrawRay(ray.origin, ray.direction * MaxCheckDistance, Color.red, CheackRate);
+
             if (Physics.Raycast(ray, out hit, MaxCheckDistance, InteractLayer))
             {
                 // 이미 상호작용하는 오브젝트가 없을 때

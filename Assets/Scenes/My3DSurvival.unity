@@ -4473,7 +4473,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CheackRate: 0.05
-  MaxCheckDistance: 3
+  MaxCheckDistance: 7
   InteractLayer:
     serializedVersion: 2
     m_Bits: 128
