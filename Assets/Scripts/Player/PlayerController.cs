@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -8,6 +9,7 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     public float MoveSpeed = 3.0f;
     public float SprintSpeed = 6.0f;
+    public float SprintStamina = 5f; // 질주 시 사용되는 스태미나
     public float JumpForce;
     private Vector2 _curMovementInput;
     public LayerMask GroundLayerMask;
@@ -65,6 +67,9 @@ public class PlayerController : MonoBehaviour
     private float _jumpTimeoutDelta;
     private float _fallTimeoutDelta;
 
+    // PlatformLauncher
+    private bool _isMovementLocked = false; // PlatformLauncher으로 날아갈 때 이동 제어 잠깐 잠금
+
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
@@ -89,11 +94,15 @@ public class PlayerController : MonoBehaviour
         HandleGroundedCheck();
         HandleRotation();
         HandleSpeedAndAnimation();
+        HandleSprintingStamina();
     }
 
     private void FixedUpdate()
     {
-        Move();
+        if (!_isMovementLocked)
+        {
+            Move();
+        }
     }
 
     private void LateUpdate()
@@ -113,12 +122,33 @@ public class PlayerController : MonoBehaviour
         _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
     }
 
+    private void HandleSprintingStamina()
+    {
+        if(_isSprinting && _isGrounded)
+        {
+            // SprintStamina 초당 소모량으로 사용
+            bool hasEnoughStamina = CharacterManager.Instance.Player.PlayerCondition.UseStamina(SprintStamina * Time.deltaTime);
+
+            if (!hasEnoughStamina)
+            {
+                _isSprinting = false;
+            }
+        }
+    }
+
     // 지면 상태를 체크하고 애니메이터에 반영
     private void HandleGroundedCheck()
     {
         // IsGrounded()의 결과를 변수에 저장
         _isGrounded = CheckIfGrounded();
         _animator.SetBool(_animIDGrounded, _isGrounded);
+
+        // 땅에 있지 않다면
+        if (!_isGrounded)
+        {
+            // 질주 상태 해제
+            _isSprinting = false;
+        }
     }
 
     private void HandleRotation()
@@ -147,32 +177,36 @@ public class PlayerController : MonoBehaviour
     // 점프, 낙하, 움직임 애니메이션 처리
     private void HandleSpeedAndAnimation()
     {
-        // 목표 속도 설정
-        float targetSpeed = _isSprinting ? SprintSpeed : MoveSpeed;
-        if (_curMovementInput == Vector2.zero)
+        // 지상에 있을 때만 실행 -> 공중에 있을 때 점프 직전의 _speed 값이 그대로 유지
+        if (_isGrounded)
         {
-            targetSpeed = 0.0f;
-        }
+            // 목표 속도 설정
+            float targetSpeed = _isSprinting ? SprintSpeed : MoveSpeed;
+            if (_curMovementInput == Vector2.zero)
+            {
+                targetSpeed = 0.0f;
+            }
 
-        // 현재 속도와 목표 속도를 기반으로 가/감속
-        float currentHorizontalSpeed = new Vector3(_rigidbody.velocity.x, 0.0f, _rigidbody.velocity.z).magnitude;
-        float speedOffset = 0.1f;
+            // 현재 속도와 목표 속도를 기반으로 가/감속
+            float currentHorizontalSpeed = new Vector3(_rigidbody.velocity.x, 0.0f, _rigidbody.velocity.z).magnitude;
+            float speedOffset = 0.1f;
 
-        if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
-        {
-            // Lerp를 사용하여 부드러운 속도 변화 생성
-            _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed, Time.deltaTime * SpeedChangeRate);
-            _speed = Mathf.Round(_speed * 1000f) / 1000f;
-        }
-        else
-        {
-            _speed = targetSpeed;
-        }
+            if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
+            {
+                // Lerp를 사용하여 부드러운 속도 변화 생성
+                _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed, Time.deltaTime * SpeedChangeRate);
+                _speed = Mathf.Round(_speed * 1000f) / 1000f;
+            }
+            else
+            {
+                _speed = targetSpeed;
+            }
 
-        _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
-        if (_animationBlend < 0.01f)
-        {
-            _animationBlend = 0f;
+            _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+            if (_animationBlend < 0.01f)
+            {
+                _animationBlend = 0f;
+            }
         }
 
         // 애니메이터에 값 전달
@@ -314,5 +348,36 @@ public class PlayerController : MonoBehaviour
         bool toggle = UnityEngine.Cursor.lockState == CursorLockMode.Locked;
         UnityEngine.Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
         CanLook = !toggle;
+    }
+
+    // PlatformLauncher에서 호출할 메서드
+    public void Launch(Vector3 direction, float force)
+    {
+        if(_isMovementLocked)
+        {
+            return;
+        }
+
+        StartCoroutine(LockMovementAndLaunch(direction, force));
+    }
+
+    private IEnumerator LockMovementAndLaunch(Vector3 direction, float force)
+    {
+        // 이동 제어 잠금
+        _isMovementLocked = true;
+
+        // 부모-자식 관계 해제
+        transform.SetParent(null);
+
+        // 기존 속도 초기화 -> 발사 힘이 정확히 적용되도록 함
+        _rigidbody.velocity = Vector3.zero;
+
+        // 주어진 방향과 힘으로 발사
+        _rigidbody.AddForce(direction * force, ForceMode.Impulse);
+
+        // 0.7초 동안 기다린 후 이동 제어 잠금 해제
+        // 이 시간 동안 Move() 메서드 호출되지 않아 속도 유지
+        yield return new WaitForSeconds(0.7f);
+        _isMovementLocked = false;
     }
 }
