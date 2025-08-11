@@ -168,7 +168,19 @@ public class PlayerController : MonoBehaviour
             }
 
             // 벽 쪽으로 밀어주는 힘 추가 (벽에서 떨어지지 않도록)
-            //_rigidbody.AddForce(-_rockNormal * 10f, ForceMode.Force);
+            // - _rockNormal은 벽 안쪽으로 밀어 넣는 방향 벡터
+            _rigidbody.AddForce(-_rockNormal * 10f, ForceMode.Force);
+
+            // Vector3.Cross(외적) - 두 벡터에 동시에 수직인 제3의 벡터 찾기
+            // 벽의 오른쪽 방향 (표면 평행)
+            Vector3 wallRight = Vector3.Cross(_rockNormal, Vector3.up).normalized;
+            // 벽의 위쪽 방향 (표면 평행)
+            Vector3 wallUp = Vector3.Cross(wallRight, _rockNormal).normalized;
+            // 입력 조합 (A/D = 좌우, W/S = 상하)
+            Vector3 moveDirection = (wallRight * _curMovementInput.x) + (wallUp * _curMovementInput.y);
+            moveDirection *= (MoveSpeed * 0.5f);
+
+            _rigidbody.velocity = moveDirection;  // 클라이밍 중 이동 적용
         }
         else // 벽에서 멀어질때, 벽타다가 내림
         {
@@ -446,9 +458,9 @@ public class PlayerController : MonoBehaviour
 
         if(_isNearWall)
         {
-            Debug.Log("Detected a wall");
-
+            // 벽에 닿았다면 벽의 표면 방향(법선 벡터)을 저장
             // Raycast로 얻은 법선 벡터 사용
+            // 법선(Normal) 벡터는 특정 표면에 대해 완벽히 수직(90도)인 방향 벡터
             _rockNormal = hit.normal;
         }
 
