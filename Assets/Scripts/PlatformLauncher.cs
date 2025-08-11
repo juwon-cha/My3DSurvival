@@ -22,7 +22,7 @@ public class PlatformLauncher : MonoBehaviour
         // 충돌한 것이 플레이어인지 확인
         if (collision.collider.CompareTag("Player"))
         {
-            // 이미 발사 절차가 진행 중이라면 중복 실행 방지
+            // 이미 발사가 진행 중이라면 중복 실행 방지
             if (_launchCoroutine != null)
             {
                 return;
@@ -32,7 +32,7 @@ public class PlatformLauncher : MonoBehaviour
             Rigidbody playerRigidbody = collision.gameObject.GetComponent<Rigidbody>();
             if (playerRigidbody != null)
             {
-                // LaunchPlayer 코루틴을 시작하고, 나중에 중지할 수 있도록 변수에 저장
+                // LaunchPlayer 코루틴을 시작하고 나중에 중지할 수 있도록 변수에 저장
                 _launchCoroutine = StartCoroutine(LaunchPlayer(playerRigidbody));
             }
         }

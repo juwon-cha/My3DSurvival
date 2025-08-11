@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     public float SprintSpeed = 6.0f;
     public float SprintStamina = 5f; // 질주 시 사용되는 스태미나
     public float JumpForce;
+    public float AirControlForce = 10f; // 공중에서 조작하는 힘
     private Vector2 _curMovementInput;
     public LayerMask GroundLayerMask;
 
@@ -47,6 +48,7 @@ public class PlayerController : MonoBehaviour
     // Player state
     private bool _isSprinting = false; // 스프린트 상태
     private bool _isGrounded = true;   // 지면 상태
+    private bool _isClimbing = false; // 벽타기 상탱
 
     // Rotation
     private float _targetRotation = 0.0f;
@@ -101,7 +103,15 @@ public class PlayerController : MonoBehaviour
     {
         if (!_isMovementLocked)
         {
-            Move();
+            // 지상에 있을 때와 공중에 있을 때 움직임 분리
+            if (_isGrounded)
+            {
+                Move(); // 지상 이동 로직
+            }
+            else
+            {
+                AirMove(); // 공중 이동 로직
+            }
         }
     }
 
@@ -263,6 +273,17 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void AirMove()
+    {
+        // 카메라 기준 방향 계산
+        Vector3 inputDir = new Vector3(_curMovementInput.x, 0.0f, _curMovementInput.y).normalized;
+        float targetRotation = Mathf.Atan2(inputDir.x, inputDir.z) * Mathf.Rad2Deg + _cameraTargetYaw;
+        Vector3 moveDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+
+        // 현재 속도에 플레이어의 입력 방향으로 힘을 더해줌
+        _rigidbody.AddForce(moveDirection.normalized * AirControlForce * 10f * Time.fixedDeltaTime, ForceMode.Force);
+    }
+
     private void CameraLook()
     {
         // 마우스 입력으로 카메라의 Yaw와 Pitch 값 누적
@@ -375,9 +396,15 @@ public class PlayerController : MonoBehaviour
         // 주어진 방향과 힘으로 발사
         _rigidbody.AddForce(direction * force, ForceMode.Impulse);
 
-        // 0.7초 동안 기다린 후 이동 제어 잠금 해제
+        // 0.5초 동안 기다린 후 이동 제어 잠금 해제
         // 이 시간 동안 Move() 메서드 호출되지 않아 속도 유지
-        yield return new WaitForSeconds(0.7f);
+        yield return new WaitForSeconds(0.5f);
         _isMovementLocked = false;
+    }
+
+    private void CheckWall()
+    {
+        RaycastHit hit;
+
     }
 }
