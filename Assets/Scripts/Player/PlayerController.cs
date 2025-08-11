@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     public float AirControlForce = 10f; // 공중에서 조작하는 힘
     private Vector2 _curMovementInput;
     public LayerMask GroundLayerMask;
+    public LayerMask WallLayerMask;
 
     [Header("Look")]
     public Transform CameraContainer;
@@ -46,9 +47,10 @@ public class PlayerController : MonoBehaviour
     private Animator _animator;
 
     // Player state
-    private bool _isSprinting = false; // 스프린트 상태
-    private bool _isGrounded = true;   // 지면 상태
-    private bool _isClimbing = false; // 벽타기 상탱
+    private bool _isSprinting = false;  // 스프린트 상태
+    private bool _isGrounded = true;    // 지면 상태
+    private bool _isNearWall = false;   // 벽 근처
+    private bool _isClimbing = false;   // 벽타기 상태
 
     // Rotation
     private float _targetRotation = 0.0f;
@@ -71,6 +73,9 @@ public class PlayerController : MonoBehaviour
 
     // PlatformLauncher
     private bool _isMovementLocked = false; // PlatformLauncher으로 날아갈 때 이동 제어 잠깐 잠금
+
+    // Climbing
+    private Vector3 _rockNormal;
 
     private void Awake()
     {
@@ -103,6 +108,8 @@ public class PlayerController : MonoBehaviour
     {
         if (!_isMovementLocked)
         {
+            HandleClimbing(); // 벽타기 로직
+
             // 지상에 있을 때와 공중에 있을 때 움직임 분리
             if (_isGrounded)
             {
@@ -143,6 +150,32 @@ public class PlayerController : MonoBehaviour
             {
                 _isSprinting = false;
             }
+        }
+    }
+
+    private void HandleClimbing()
+    {
+        _isClimbing = CheckWall();
+
+        if(_isClimbing)
+        {
+            if (Input.GetKey(KeyCode.W))
+            {
+                // 벽타기 애니메이션
+                //_animator.SetBool("Climbing", true);
+
+                _rigidbody.useGravity = false;
+            }
+
+            // 벽 쪽으로 밀어주는 힘 추가 (벽에서 떨어지지 않도록)
+            //_rigidbody.AddForce(-_rockNormal * 10f, ForceMode.Force);
+        }
+        else // 벽에서 멀어질때, 벽타다가 내림
+        {
+            // 애니메이션 처리
+            //_animator.SetBool("Climbing", false);
+
+            _rigidbody.useGravity = true;
         }
     }
 
@@ -402,9 +435,23 @@ public class PlayerController : MonoBehaviour
         _isMovementLocked = false;
     }
 
-    private void CheckWall()
+    private bool CheckWall()
     {
+        Ray ray = new Ray(transform.position + (transform.up * 1.0f), transform.forward);
         RaycastHit hit;
 
+        Debug.DrawRay(ray.origin, ray.direction * 0.5f, Color.red);
+
+        _isNearWall = Physics.Raycast(ray, out hit, 0.5f, WallLayerMask);
+
+        if(_isNearWall)
+        {
+            Debug.Log("Detected a wall");
+
+            // Raycast로 얻은 법선 벡터 사용
+            _rockNormal = hit.normal;
+        }
+
+        return _isNearWall;
     }
 }
