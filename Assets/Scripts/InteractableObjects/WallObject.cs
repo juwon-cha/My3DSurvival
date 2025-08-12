@@ -6,7 +6,7 @@ public class WallObject : MonoBehaviour, IInteractable
 {
     public string GetInteractPrompt()
     {
-        return $"[W] 키를 눌러 매달리기";
+        return $"[W] 키를 눌러 벽 타기";
     }
 
     public void OnInteract() { }

@@ -14,7 +14,6 @@ public class PlayerController : MonoBehaviour
     public float AirControlForce = 10f; // 공중에서 조작하는 힘
     private Vector2 _curMovementInput;
     public LayerMask GroundLayerMask;
-    public LayerMask WallLayerMask;
 
     [Header("Look")]
     public Transform CameraContainer;
@@ -161,9 +160,6 @@ public class PlayerController : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.W))
             {
-                // 벽타기 애니메이션
-                //_animator.SetBool("Climbing", true);
-
                 _rigidbody.useGravity = false;
             }
 
@@ -184,9 +180,6 @@ public class PlayerController : MonoBehaviour
         }
         else // 벽에서 멀어질때, 벽타다가 내림
         {
-            // 애니메이션 처리
-            //_animator.SetBool("Climbing", false);
-
             _rigidbody.useGravity = true;
         }
     }
@@ -454,16 +447,22 @@ public class PlayerController : MonoBehaviour
 
         Debug.DrawRay(ray.origin, ray.direction * 0.5f, Color.red);
 
-        _isNearWall = Physics.Raycast(ray, out hit, 0.5f, WallLayerMask);
-
-        if(_isNearWall)
+        if(Physics.Raycast(ray, out hit, 0.5f) && hit.collider.CompareTag("Wall"))
         {
-            // 벽에 닿았다면 벽의 표면 방향(법선 벡터)을 저장
-            // Raycast로 얻은 법선 벡터 사용
-            // 법선(Normal) 벡터는 특정 표면에 대해 완벽히 수직(90도)인 방향 벡터
-            _rockNormal = hit.normal;
+            _isNearWall = true;
+            if (_isNearWall)
+            {
+                // 벽에 닿았다면 벽의 표면 방향(법선 벡터)을 저장
+                // Raycast로 얻은 법선 벡터 사용
+                // 법선(Normal) 벡터는 특정 표면에 대해 완벽히 수직(90도)인 방향 벡터
+                _rockNormal = hit.normal;
+            }
         }
-
+        else
+        {
+            _isNearWall = false;
+        }
+        
         return _isNearWall;
     }
 }
