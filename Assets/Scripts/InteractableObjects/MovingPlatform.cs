@@ -10,12 +10,8 @@ public class MovingPlatform : MonoBehaviour
     private Vector3 _startPosition;
     private Vector3 _targetWorldPosition;
 
-    private Rigidbody _rigidbody;
-
     private void Awake()
     {
-        _rigidbody = GetComponent<Rigidbody>();
-
         // 시작 위치의 월드 좌표 저장
         _startPosition = transform.position;
 
@@ -44,6 +40,6 @@ public class MovingPlatform : MonoBehaviour
         // t 값이 0이면 a 위치를, 1이면 b 위치를, 0.5이면 a와 b의 중간 위치를 반환
         Vector3 moveVec = Vector3.Lerp(_startPosition, _targetWorldPosition, pingpongValue);
 
-        _rigidbody.MovePosition(moveVec);
+        transform.position = moveVec;
     }
 }

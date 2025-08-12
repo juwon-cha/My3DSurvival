@@ -279,36 +279,13 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        // 플레이어가 움직이는 플랫폼 위에 있지 않을 때
-        if (transform.parent == null)
-        {
-            // 입력이 있을 때만 캐릭터의 앞 방향으로 이동
-            Vector3 moveDirection = transform.forward * (_curMovementInput == Vector2.zero ? 0f : 1f);
+        // 입력이 있을 때만 캐릭터의 앞 방향으로 이동
+        Vector3 moveDirection = transform.forward * (_curMovementInput == Vector2.zero ? 0f : 1f);
 
-            // Rigidbody의 속도 설정
-            Vector3 targetVelocity = moveDirection.normalized * _speed;
-            targetVelocity.y = _rigidbody.velocity.y; // Y축 속도는 유지
-            _rigidbody.velocity = targetVelocity;
-        }
-        else
-        {
-            // 현재 내가 올라탄 플랫폼의 Rigidbody를 가져옴
-            Rigidbody platformRigidbody = transform.parent.GetComponent<Rigidbody>();
-
-            // 플레이어의 키보드 입력에 따른 목표 속도를 계산
-            Vector3 moveDirection = transform.forward * (_curMovementInput.magnitude > 0.1f ? 1f : 0f);
-            Vector3 playerInputVelocity = moveDirection.normalized * _speed;
-
-            // 최종 속도 = (플랫폼의 현재 속도) + (플레이어의 입력 속도)
-            // 이렇게 하면 입력이 없을 때 playerInputVelocity가 0이 되어 플랫폼의 속도만 남게 된다
-            Vector3 finalVelocity = platformRigidbody.velocity + playerInputVelocity;
-
-            // 점프나 중력에 의한 Y축 속도는 플레이어의 것을 그대로 사용
-            finalVelocity.y = _rigidbody.velocity.y;
-
-            // 계산된 최종 속도를 플레이어의 Rigidbody에 적용
-            _rigidbody.velocity = finalVelocity;
-        }
+        // Rigidbody의 속도 설정
+        Vector3 targetVelocity = moveDirection.normalized * _speed;
+        targetVelocity.y = _rigidbody.velocity.y; // Y축 속도는 유지
+        _rigidbody.velocity = targetVelocity;
     }
 
     private void AirMove()
