@@ -10,18 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e2e09c5956608844c8288c85d246e544, type: 3}
-  m_Name: Item_Carrot
+  m_Name: Item_Steak
   m_EditorClassIdentifier: 
-  DisplayName: "\uB2F9\uADFC"
-  Description: "\uCCB4\uB825\uACFC \uBC30\uACE0\uD514\uC744 \uD68C\uBCF5\uD569\uB2C8\uB2E4."
+  DisplayName: "\uC2A4\uD14C\uC774\uD06C"
+  Description: "10\uCD08 \uB3D9\uC548 \uBB34\uC801 \uC0C1\uD0DC\uAC00 \uB429\uB2C8\uB2E4."
   ItemType: 1
-  Icon: {fileID: 21300000, guid: b53822ec75d701e49b9947d1d09fd81e, type: 3}
-  DropPrefab: {fileID: 8573866419063747366, guid: 0058fc6b9f76abd49b0b77c2edd41ec7, type: 3}
+  Icon: {fileID: 21300000, guid: 6054318fc678eef4e97655493b73c580, type: 3}
+  DropPrefab: {fileID: 8573866419063747366, guid: 9190cd291995cc345a860efb5c0bdacd, type: 3}
   CanStack: 1
   MaxStackAmount: 12
   Consumables:
-  - Type: 0
-    Value: 50
-  - Type: 1
-    Value: 100
+  - Type: 4
+    Value: 10
   EquipPrefab: {fileID: 0}

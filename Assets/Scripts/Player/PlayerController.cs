@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,6 +10,7 @@ public class PlayerController : MonoBehaviour
     public float SprintSpeed = 6.0f;
     public float SprintStamina = 5f; // 질주 시 사용되는 스태미나
     public float JumpForce;
+    private bool _isDoubleJumpUsed = false;
     public float AirControlForce = 10f; // 공중에서 조작하는 힘
     private Vector2 _curMovementInput;
     public LayerMask GroundLayerMask;
@@ -341,10 +341,19 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
+        PlayerCondition condition = CharacterManager.Instance.Player.PlayerCondition;
+
         if (context.phase == InputActionPhase.Started && _isGrounded && _jumpTimeoutDelta <= 0.0f)
         {
             _rigidbody.AddForce(Vector2.up * JumpForce, ForceMode.Impulse);
             _animator.SetBool(_animIDJump, true);
+        }
+        else if(context.phase == InputActionPhase.Started && !_isGrounded && condition.IsDoubleJumpActive && !_isDoubleJumpUsed)
+        {
+            // 이단 점프
+            _rigidbody.AddForce(Vector2.up * JumpForce, ForceMode.Impulse);
+            _animator.SetBool(_animIDJump, true);
+            _isDoubleJumpUsed = true;
         }
     }
 
@@ -363,6 +372,9 @@ public class PlayerController : MonoBehaviour
             Debug.DrawRay(rays[i].origin, rays[i].direction * 0.1f, Color.red);
             if (Physics.Raycast(rays[i], 0.1f, GroundLayerMask))
             {
+                // 이단 점프 사용 초기화
+                _isDoubleJumpUsed = false;
+
                 return true;
             }
         }

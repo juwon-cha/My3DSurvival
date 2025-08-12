@@ -8,10 +8,19 @@ public enum EItemType
     Resource
 }
 
+public enum EEquipType
+{
+    Weapon,
+    Armor,
+}
+
 public enum EConsumableType
 {
     Health,
     Hunger,
+    Speed,
+    Jump,
+    Invincibility
 }
 
 [Serializable]

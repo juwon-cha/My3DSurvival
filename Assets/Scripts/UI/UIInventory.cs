@@ -212,6 +212,18 @@ public class UIInventory : MonoBehaviour
                         _condition.Eat(_selectedItem.Consumables[i].Value);
                         break;
 
+                    case EConsumableType.Speed:
+                        _condition.ActivateSpeedUp(_selectedItem.Consumables[i].Value);
+                        break;
+
+                    case EConsumableType.Jump:
+                        _condition.ActivateDoubleJump(_selectedItem.Consumables[i].Value);
+                        break;
+
+                    case EConsumableType.Invincibility:
+                        _condition.ActivateInvincibility(_selectedItem.Consumables[i].Value);
+                        break;
+                        
                     default:
                         break;
                 }

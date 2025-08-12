@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public interface IDamagable
@@ -17,6 +18,13 @@ public class PlayerCondition : MonoBehaviour, IDamagable
     public float NoHungerHealthDecay;
 
     public event Action OnTakeDamage;
+
+    public bool IsInvincible { get; private set; } = false;
+    public bool IsDoubleJumpActive { get; private set; } = false;
+
+    private Coroutine _doubleJumpCoroutine;
+    private Coroutine _invincibilityCoroutine;
+    private Coroutine _speedUpCoroutine;
 
     private void Update()
     {
@@ -51,6 +59,12 @@ public class PlayerCondition : MonoBehaviour, IDamagable
 
     public void TakePhysicalDamage(int damage)
     {
+        // 무적 상태라면 데미지 무시
+        if(IsInvincible)
+        {
+            return;
+        }
+
         Health.Subtract(damage);
         OnTakeDamage?.Invoke();
     }
@@ -65,5 +79,74 @@ public class PlayerCondition : MonoBehaviour, IDamagable
         Stamina.Subtract(amount);
 
         return true;
+    }
+
+    public void ActivateDoubleJump(float duration)
+    {
+        if (_doubleJumpCoroutine != null)
+        {
+            StopCoroutine(_doubleJumpCoroutine);
+        }
+
+        _doubleJumpCoroutine = StartCoroutine(DoubleJumpRoutine(duration));
+    }
+
+    public void ActivateInvincibility(float duration)
+    {
+        if (_invincibilityCoroutine != null)
+        {
+            StopCoroutine(_invincibilityCoroutine);
+        }
+
+        _invincibilityCoroutine = StartCoroutine(InvincibilityRoutine(duration));
+    }
+
+    public void ActivateSpeedUp(float duration)
+    {
+        if (_speedUpCoroutine != null)
+        {
+            StopCoroutine(_speedUpCoroutine);
+        }
+
+        _speedUpCoroutine = StartCoroutine(SpeedUpRoutine(duration));
+    }
+
+    private IEnumerator DoubleJumpRoutine(float duration)
+    {
+        IsDoubleJumpActive = true;
+        Debug.Log("DoubleJump Activated!");
+
+        yield return new WaitForSeconds(duration);
+
+        IsDoubleJumpActive = false;
+        Debug.Log("DoubleJump Deactivated!");
+    }
+
+    private IEnumerator InvincibilityRoutine(float duration)
+    {
+        IsInvincible = true;
+        Debug.Log("Invincibility Activated!");
+
+        yield return new WaitForSeconds(duration);
+
+        IsInvincible = false;
+        Debug.Log("Invincibility Deactivated!");
+    }
+
+    private IEnumerator SpeedUpRoutine(float duration)
+    {
+        PlayerController controller = CharacterManager.Instance.Player.PlayerController;
+        float originalMoveSpeed = controller.MoveSpeed;
+        float originalSprintSpeed = controller.SprintSpeed;
+
+        controller.MoveSpeed *= 2.0f; // 속도 2배 증가
+        controller.SprintSpeed *= 2.0f;
+        Debug.Log("SpeedUp Activated!");
+
+        yield return new WaitForSeconds(duration);
+
+        controller.MoveSpeed = originalMoveSpeed;
+        controller.SprintSpeed = originalSprintSpeed;
+        Debug.Log("SpeedUp Deactivated!");
     }
 }

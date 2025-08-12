@@ -8,6 +8,7 @@ public class EquipTool : Equip
     private bool isAttacking;
     public float AttackDistance;
     public float UseStamina;
+    public float BuffValue;
 
     [Header("Resource Gathering")]
     public bool DoesGatherResources;
@@ -17,12 +18,12 @@ public class EquipTool : Equip
     public int Damage;
 
     private Animator _animator;
-    private Camera _camera;
+    //private Camera _camera;
 
     private void Start()
     {
         _animator = GetComponent<Animator>();
-        _camera = Camera.main;
+        //_camera = Camera.main;
     }
 
     public override void OnAttackInput()
@@ -45,7 +46,9 @@ public class EquipTool : Equip
 
     public void OnHit()
     {
-        Ray ray = _camera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        //Ray ray = _camera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        Ray ray = new Ray(transform.position + (transform.up * 1.0f), transform.forward);
+        Debug.DrawRay(transform.position + (transform.up * 1.0f), transform.forward * AttackDistance, Color.red);
         RaycastHit hit;
 
         if(Physics.Raycast(ray, out hit, AttackDistance))
