@@ -8,7 +8,7 @@ public class DamageIndicator : MonoBehaviour
     public Image Img;
     public float FlashSpeed;
 
-    private Coroutine coroutine;
+    private Coroutine _coroutine;
 
     private void Start()
     {
@@ -17,14 +17,14 @@ public class DamageIndicator : MonoBehaviour
 
     public void Flash()
     {
-        if(coroutine != null)
+        if(_coroutine != null)
         {
-            StopCoroutine(coroutine);
+            StopCoroutine(_coroutine);
         }
 
         Img.enabled = true;
         Img.color = new Color(1f, 100f / 255f, 100f / 255f);
-        coroutine = StartCoroutine(FadeAway());
+        _coroutine = StartCoroutine(FadeAway());
     }
 
     private IEnumerator FadeAway()

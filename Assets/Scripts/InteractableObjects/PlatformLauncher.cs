@@ -54,7 +54,7 @@ public class PlatformLauncher : MonoBehaviour
     }
 
     // 시간 지연 후 플레이어를 발사하는 코루틴
-    private IEnumerator LaunchPlayer(Rigidbody playerRigidbody)
+    public IEnumerator LaunchPlayer(Rigidbody playerRigidbody)
     {
         // _launchDelay 만큼 대기
         yield return new WaitForSeconds(_launchDelay);
