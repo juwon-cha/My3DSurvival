@@ -28,6 +28,11 @@ public class EquipTool : Equip
 
     public override void OnAttackInput()
     {
+        if(AttackDistance <= 0)
+        {
+            return;
+        }
+
         if(!isAttacking)
         {
             if(CharacterManager.Instance.Player.PlayerCondition.UseStamina(UseStamina))

@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Equip : MonoBehaviour
 {
-    public EEquipType Type;
-
     public virtual void OnAttackInput()
     {
 

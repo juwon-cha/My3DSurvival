@@ -21,27 +21,39 @@ public class Equipment : MonoBehaviour
         // 이미 장착된 아이템이 있다면 해제
         UnEquip();
 
-        switch (CurEquip.Type)
+        Transform socket = null;
+        switch (data.EquipType)
         {
             case EEquipType.Weapon:
-                CurEquip = Instantiate(data.EquipPrefab, WeaponSocket).GetComponent<Equip>();
+                socket = WeaponSocket;
                 break;
-
             case EEquipType.Armor:
-                CurEquip = Instantiate(data.EquipPrefab, HelmetSocket).GetComponent<Equip>();
-                ActivateSpeedBuff();
-                break;
-
-            default:
+                socket = HelmetSocket;
                 break;
         }
-        
+
+        if (socket != null)
+        {
+            CurEquip = Instantiate(data.EquipPrefab, socket).GetComponent<Equip>();
+
+            // 버프가 있다면 활성화
+            if (data.EquipType == EEquipType.Armor)
+            {
+                ActivateSpeedBuff();
+            }
+        }
     }
 
     public void UnEquip()
     {
         if(CurEquip != null)
         {
+            // 장비 파괴 전 버프 비활성화
+            if (CurEquip is EquipTool armor)
+            {
+                DeactivateBuff();
+            }
+
             Destroy(CurEquip.gameObject);
             CurEquip = null;
         }
@@ -57,20 +69,24 @@ public class Equipment : MonoBehaviour
 
     private void ActivateSpeedBuff()
     {
-        if (CurEquip.Type == EEquipType.Armor)
-        {
-            EquipTool armor = (EquipTool)CurEquip;
+        EquipTool armor = (EquipTool)CurEquip;
 
-            PlayerController controller = CharacterManager.Instance.Player.PlayerController;
-            if(controller != null)
-            {
-                controller.MoveSpeed *= armor.BuffValue;
-            }
+        PlayerController controller = CharacterManager.Instance.Player.PlayerController;
+        if (controller != null)
+        {
+            controller.MoveSpeed *= armor.BuffValue;
+            controller.SprintSpeed *= armor.BuffValue;
         }
     }
 
-    private void DeactivateSpeedBuff()
+    private void DeactivateBuff()
     {
-
+        EquipTool armor = (EquipTool)CurEquip;
+        PlayerController controller = CharacterManager.Instance.Player.PlayerController;
+        if (controller != null && armor.BuffValue != 0) // 0으로 나누는 것 방지
+        {
+            controller.MoveSpeed /= armor.BuffValue;
+            controller.SprintSpeed /= armor.BuffValue;
+        }
     }
 }

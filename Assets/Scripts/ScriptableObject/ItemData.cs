@@ -10,6 +10,7 @@ public enum EItemType
 
 public enum EEquipType
 {
+    None,
     Weapon,
     Armor,
 }
@@ -37,6 +38,7 @@ public class ItemData : ScriptableObject
     public string DisplayName;
     public string Description;
     public EItemType ItemType;
+    public EEquipType EquipType;
     public Sprite Icon;
     public GameObject DropPrefab;
 

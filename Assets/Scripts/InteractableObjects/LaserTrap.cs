@@ -17,12 +17,14 @@ public class LaserTrap : MonoBehaviour
         StartCoroutine(CheckPlayerRoutine());
     }
 
+    // 지정된 개수만큼 원형으로 Raycast를 발사하여 플레이어 감지
     private IEnumerator CheckPlayerRoutine()
     {
         while(true)
         {
             bool isDetectedThisCycle = false;
 
+            // 레이캐스트 시작 위치를 Y축으로 약간 올림
             Vector3 startPosition = transform.position + (transform.up * _raycastOffsetY);
             float angleStep = 360f / _numberOfRays;
 
@@ -38,7 +40,7 @@ public class LaserTrap : MonoBehaviour
                 }
             }
 
-            // 이전 프레임과 현재 프레임의 감지 상태를 비교하여 경고를 시작하거나 멈춥니다.
+            // 이전 프레임과 현재 프레임의 감지 상태를 비교하여 경고를 시작하거나 멈춤
             if (isDetectedThisCycle && !_isPlayerBeingDetected)
             {
                 // 이번에 처음 감지되었다면: 경고 시작
@@ -57,6 +59,7 @@ public class LaserTrap : MonoBehaviour
         }
     }
 
+    // 씬(Scene) 뷰에서 레이캐스트를 시각적으로 보여줌
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -69,7 +72,7 @@ public class LaserTrap : MonoBehaviour
             float currentAngle = angleStep * i;
             Vector3 direction = Quaternion.Euler(0, currentAngle, 0) * transform.forward;
 
-            // Gizmos로 레이를 그립니다.
+            // Gizmos로 레이를 그림
             Gizmos.DrawRay(startPosition, direction * _distance);
         }
     }
