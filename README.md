@@ -10,6 +10,17 @@
 <br>
 Unity Editor Version: 2022.3.17f1
 
+## 플레이 영상
+
+<div align="center">
+
+  <a href="https://www.youtube.com/watch?v=v-1ZMxP9bqI">
+    <img src="https://img.youtube.com/vi/v-1ZMxP9bqI/maxresdefault.jpg" width="600" alt="첫 번째 유튜브 영상 썸네일">
+  </a>
+</div>
+
+<br>
+
 ## 주요 기능
 
 ### 주요 기능 상세
