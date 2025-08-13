@@ -28,6 +28,7 @@ Unity Editor Version: 2022.3.17f1
 -   **기본 이동 및 점프** (`PlayerController.cs`)
     -   **이동**: `FixedUpdate`에서 `Rigidbody.velocity`를 직접 제어하여 지상 이동을 구현하고 공중에서는 `Rigidbody.AddForce`를 통해 제어력을 제공한다.
     -   **점프**: `OnJump` 콜백에서 `_isGrounded` 상태를 확인 후 `Rigidbody.AddForce(Vector2.up * JumpForce, ForceMode.Impulse)`를 통해 점프를 실행한다.
+    -   **질주**: 사용자가 질주 키(좌측 Shift)를 누르면 `_isSprinting` 상태가 활성화되고 이 상태에 따라 이동 속도가 `SprintSpeed`로 변경되며 동시에 매 프레임 스태미나가 소모된다. 키를 떼거나, 공중에 뜨거나, 스태미나가 다 떨어지면 질주가 멈춘다.
 
 -   **체력/허기/스태미나 UI** (`PlayerCondition.cs`, `Condition.cs`, `UICondition.cs`)
     -   `PlayerCondition`에서 체력, 허기, 스태미나의 수치를 관리하며 각 상태는 `Condition` 클래스로 정의된다. `Condition` 클래스의 `Update`에서 `UIBar.fillAmount`를 지속적으로 갱신하여 UI에 반영한다.
