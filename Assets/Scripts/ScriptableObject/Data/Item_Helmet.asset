@@ -15,6 +15,7 @@ MonoBehaviour:
   DisplayName: "\uBC84\uAC70 \uD5EC\uBA67"
   Description: "\uCC29\uC6A9 \uC2DC \uC18D\uB3C4\uAC00 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   ItemType: 0
+  EquipType: 2
   Icon: {fileID: 21300000, guid: ff7bfa7addf40784d86f62b8e4a034a6, type: 3}
   DropPrefab: {fileID: 2843437569365180153, guid: 94864f9914733de47955a2d07c716f10, type: 3}
   CanStack: 0

@@ -4483,7 +4483,7 @@ Transform:
   m_GameObject: {fileID: 1204564959}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.58, y: 0, z: -1.84}
+  m_LocalPosition: {x: -15.53, y: 0, z: -44.09}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4655,7 +4655,7 @@ MonoBehaviour:
   AirControlForce: 5
   GroundLayerMask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 183
   CameraContainer: {fileID: 1174248096}
   MinXLook: -85
   MaxXLook: 85

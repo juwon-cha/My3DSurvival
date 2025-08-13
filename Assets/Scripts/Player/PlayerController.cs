@@ -50,6 +50,7 @@ public class PlayerController : MonoBehaviour
     private bool _isGrounded = true;    // 지면 상태
     private bool _isNearWall = false;   // 벽 근처
     private bool _isClimbing = false;   // 벽타기 상태
+    private bool _isMantling = false;   // 가장자리에서 벽 올라타기 상태
 
     // Rotation
     private float _targetRotation = 0.0f;
@@ -109,14 +110,18 @@ public class PlayerController : MonoBehaviour
         {
             HandleClimbing(); // 벽타기 로직
 
-            // 지상에 있을 때와 공중에 있을 때 움직임 분리
-            if (_isGrounded)
+            // 벽타기나 가장자리 올라타기 상태일 때는 이동하지 않음
+            if(!_isClimbing && !_isMantling)
             {
-                Move(); // 지상 이동 로직
-            }
-            else
-            {
-                AirMove(); // 공중 이동 로직
+                // 지상에 있을 때와 공중에 있을 때 움직임 분리
+                if (_isGrounded)
+                {
+                    Move(); // 지상 이동 로직
+                }
+                else
+                {
+                    AirMove(); // 공중 이동 로직
+                }
             }
         }
     }
@@ -154,13 +159,28 @@ public class PlayerController : MonoBehaviour
 
     private void HandleClimbing()
     {
-        _isClimbing = CheckWall();
-
-        if(_isClimbing)
+        if (_isMantling)
         {
+            return;
+        }
+
+        if (CheckWallEdge(out Vector3 edgePoint))
+        {
+            // 가장자리가 감지되면 맨틀링 코루틴 시작
+            StartCoroutine(MantleCoroutine(edgePoint));
+        }
+        else if (CheckWall())
+        {
+            _isClimbing = true;
+
             if (Input.GetKey(KeyCode.W))
             {
                 _rigidbody.useGravity = false;
+            }
+            else
+            {
+                // w 키 눌러서 벽을 올라가지 않으면 중력 적용
+                _rigidbody.useGravity = true;
             }
 
             // 벽 쪽으로 밀어주는 힘 추가 (벽에서 떨어지지 않도록)
@@ -180,6 +200,7 @@ public class PlayerController : MonoBehaviour
         }
         else // 벽에서 멀어질때, 벽타다가 내림
         {
+            _isClimbing = false;
             _rigidbody.useGravity = true;
         }
     }
@@ -361,10 +382,10 @@ public class PlayerController : MonoBehaviour
     {
         Ray[] rays = new Ray[4]
         {
-            new Ray(transform.position + (transform.forward * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
-            new Ray(transform.position + (-transform.forward * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
-            new Ray(transform.position + (transform.right * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
-            new Ray(transform.position + (-transform.right * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
+            new Ray(transform.position + (transform.forward * 0.1f) + (Vector3.up * 0.01f), Vector3.down),
+            new Ray(transform.position + (-transform.forward * 0.1f) + (Vector3.up * 0.01f), Vector3.down),
+            new Ray(transform.position + (transform.right * 0.1f) + (Vector3.up * 0.01f), Vector3.down),
+            new Ray(transform.position + (-transform.right * 0.1f) + (Vector3.up * 0.01f), Vector3.down),
         };
 
         for (int i = 0; i < rays.Length; i++)
@@ -431,12 +452,12 @@ public class PlayerController : MonoBehaviour
 
     private bool CheckWall()
     {
-        Ray ray = new Ray(transform.position + (transform.up * 1.0f), transform.forward);
+        Ray bodyRay = new Ray(transform.position + (transform.up * 1.0f), transform.forward);
         RaycastHit hit;
 
-        Debug.DrawRay(ray.origin, ray.direction * 0.5f, Color.red);
+        Debug.DrawRay(bodyRay.origin, bodyRay.direction * 0.5f, Color.red);
 
-        if(Physics.Raycast(ray, out hit, 0.5f) && hit.collider.CompareTag("Wall"))
+        if(Physics.Raycast(bodyRay, out hit, 0.5f) && hit.collider.CompareTag("Wall"))
         {
             _isNearWall = true;
             if (_isNearWall)
@@ -453,5 +474,71 @@ public class PlayerController : MonoBehaviour
         }
         
         return _isNearWall;
+    }
+
+    private bool CheckWallEdge(out Vector3 edgePoint)
+    {
+        edgePoint = Vector3.zero;
+
+        // 가슴과 머리 위치에서 레이를 쏴서 가장자리인지 확인
+        Ray bodyRay = new Ray(transform.position + (transform.up * 1.0f), transform.forward);
+        Ray headRay = new Ray(transform.position + (transform.up * 1.8f), transform.forward); // 머리 위치 레이
+        RaycastHit headHit;
+        RaycastHit bodyHit;
+
+        Debug.DrawRay(headRay.origin, headRay.direction * 0.5f, Color.red);
+
+        // 가슴 레이는 벽에 닿고, 머리 레이는 닿지 않아야 함
+        if (Physics.Raycast(bodyRay, out bodyHit, 0.5f) && bodyHit.collider.CompareTag("Wall")
+            && !Physics.Raycast(headRay, out headHit, 0.5f))
+        {
+            // 올라설 위치 찾기
+            // 머리 레이 시작점에서 약간 앞으로 그리고 아래로 레이를 쏴서 착지 지점을 찾음
+            Vector3 edgeCheckStartPoint = headRay.origin + transform.forward * 0.5f;
+            RaycastHit hit;
+
+            Debug.DrawRay(edgeCheckStartPoint, Vector3.down * 2.0f, Color.red);
+            if (Physics.Raycast(edgeCheckStartPoint, Vector3.down, out hit, 2.0f) && hit.collider.CompareTag("Wall"))
+            {
+                // 착지 지점을 찾았으면 그 위치 반환
+                edgePoint = hit.point;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private IEnumerator MantleCoroutine(Vector3 targetPosition)
+    {
+        // 맨틀링 상태로 전환 및 물리 설정
+        _isMantling = true;
+        _isClimbing = false;
+        _rigidbody.useGravity = false;
+        _rigidbody.velocity = Vector3.zero; // 이동 전 속도 초기화
+
+        Vector3 startPos = transform.position;
+        // 캐릭터의 최종 위치는 바닥에서 살짝 떠 있도록 조정 (캐릭터 콜라이더 높이의 절반 정도)
+        Vector3 finalPos = targetPosition + (transform.up * 1.5f);
+        float duration = 0.5f;
+        float timer = 0f;
+
+        // 부드러운 이동
+        while (timer < duration)
+        {
+            float t = timer / duration;
+            // SmoothStep을 사용해 시작과 끝에서 속도를 줄여 더 부드러운 움직임 생성
+            t = Mathf.SmoothStep(0f, 1f, t);
+            transform.position = Vector3.Lerp(startPos, finalPos, t);
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        // 이동 완료 후 상태 복귀
+        transform.position = finalPos; // 정확한 최종 위치로 설정
+        _isMantling = false;
+        _isClimbing = false;
+        _rigidbody.useGravity = true;
     }
 }
